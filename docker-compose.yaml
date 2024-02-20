@@ -1,0 +1,12 @@
+version: '3'
+services:
+
+  app:
+    build:
+      context: app
+    env_file:
+      - .env
+    #logging:
+      #driver: loki
+      #options:
+        #loki-url: http://host.docker.internal:3100/loki/api/v1/push
