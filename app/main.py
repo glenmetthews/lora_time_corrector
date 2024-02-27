@@ -25,10 +25,14 @@ def on_message(ws: WebSocket, message):
     msg_json = json.loads(message)
 
     if 'data' in msg_json:
-        if re.match(r'^03\w{8}$', msg_json["data"]) and utils.check_request_time(request_time=msg_json["data"][2:]):
-            utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
-            logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}. Время на датчике было - {int(msg_json['data'][2:], 16)}")
+        if re.match(r'^03\w{8}$', msg_json["data"]):
+            logging.info(f"Запрос времени от {msg_json['devEui']}, с датой {int(msg_json['data'][2:], 16)}")
+            if utils.check_request_time(request_time=msg_json["data"][2:]):
+                utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
+                logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}.")
+            logging.info(f"Диапазон корректировки не превышен. Корректировка не требуется.")
         if re.match(r'^03$', msg_json["data"]):
+            logging.info(f"Запрос времени от {msg_json['devEui']}.")
             utils.send_time_package(ws, dev_eui=msg_json['devEui'])
             logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}")
 
@@ -42,7 +46,7 @@ def on_close(ws: WebSocket):
 
 
 if __name__ == "__main__":
-    websocket.enableTrace(True)
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(asctime)s | %(message)s", stream=sys.stdout)
 
     ws = websocket.WebSocketApp(
@@ -52,6 +56,8 @@ if __name__ == "__main__":
         on_error=on_error,
         on_close=on_close
     )
+
     ws.run_forever(dispatcher=rel, reconnect=5)
     rel.signal(2, rel.abort)
     rel.dispatch()
+    logging.info(f"Time corrector is running")
