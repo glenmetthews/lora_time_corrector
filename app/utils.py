@@ -33,12 +33,3 @@ def send_time_package(ws, dev_eui, request_time: str = None):
     else:
         response = generate_time_package(dev_eui=dev_eui)
     ws.send(json.dumps(response))
-
-
-
-if __name__ == '__main__':
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
-    print(send_time_package(dev_eui='sss', request_time='65d514e3'))

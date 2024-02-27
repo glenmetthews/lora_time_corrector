@@ -7,7 +7,7 @@ import rel
 import os
 import logging
 from websocket import WebSocket
-import sys
+from datetime import datetime
 
 import utils
 
@@ -26,7 +26,7 @@ def on_message(ws: WebSocket, message):
 
     if 'data' in msg_json:
         if re.match(r'^03\w{8}$', msg_json["data"]):
-            logging.info(f"Запрос времени от {msg_json['devEui']}, с датой {int(msg_json['data'][2:], 16)}")
+            logging.info(f"Запрос времени от {msg_json['devEui']}, с датой {datetime.fromtimestamp(int(msg_json['data'][2:], 16))}")
             if utils.check_request_time(request_time=msg_json["data"][2:]):
                 utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
                 logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}.")
@@ -47,7 +47,7 @@ def on_close(ws: WebSocket):
 
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(asctime)s | %(message)s", stream=sys.stdout)
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(asctime)s | %(message)s")
 
     ws = websocket.WebSocketApp(
         url=f"ws://{os.getenv('HOST')}:{os.getenv('PORT')}",
@@ -56,8 +56,9 @@ if __name__ == "__main__":
         on_error=on_error,
         on_close=on_close
     )
-
+    logging.info(f"Time corrector is running")
     ws.run_forever(dispatcher=rel, reconnect=5)
+
     rel.signal(2, rel.abort)
     rel.dispatch()
-    logging.info(f"Time corrector is running")
+
