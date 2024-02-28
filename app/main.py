@@ -30,7 +30,8 @@ def on_message(ws: WebSocket, message):
             if utils.check_request_time(request_time=msg_json["data"][2:]):
                 utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
                 logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}.")
-            logging.info(f"Диапазон корректировки не превышен. Корректировка не требуется.")
+            else:
+                logging.info(f"Диапазон корректировки не превышен. Корректировка не требуется.")
         if re.match(r'^03$', msg_json["data"]):
             logging.info(f"Запрос времени от {msg_json['devEui']}.")
             utils.send_time_package(ws, dev_eui=msg_json['devEui'])
