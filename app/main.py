@@ -26,16 +26,19 @@ def on_message(ws: WebSocket, message):
 
     if 'data' in msg_json:
         if re.match(r'^03\w{8}$', msg_json["data"]):
-            logging.info(f"Запрос времени от {msg_json['devEui']}, с датой {datetime.fromtimestamp(int(msg_json['data'][2:], 16))}")
-            if utils.check_request_time(request_time=msg_json["data"][2:]):
-                utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
-                logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}.")
-            else:
-                logging.info(f"Диапазон корректировки не превышен. Корректировка не требуется.")
+            if msg_json['type'] == 'UNCONF_UP':
+                logging.info(f"Запрос времени от {msg_json['devEui']}, с датой {datetime.fromtimestamp(int(msg_json['data'][2:], 16))}")
+                if utils.check_request_time(request_time=msg_json["data"][2:]):
+                    utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
+                    logging.info(f"Отправлен запрос на корректировку времени. DevEui = {msg_json['devEui']}.")
+                else:
+                    logging.info("Диапазон корректировки не превышен. Корректировка не требуется.")
+            if msg_json['type'] == 'UNCONF_DOWN':
+                logging.info(f"Время скорректиировано. DevEui = {msg_json['devEui']}. Текущее время - {datetime.fromtimestamp(int(msg_json['data'][2:], 16))} ")
         if re.match(r'^03$', msg_json["data"]):
             logging.info(f"Запрос времени от {msg_json['devEui']}.")
             utils.send_time_package(ws, dev_eui=msg_json['devEui'])
-            logging.info(f"Время скорректировано. DevEui = {msg_json['devEui']}")
+            logging.info(f"Отправлен запрос на корректировку времени. DevEui = {msg_json['devEui']}")
 
 
 def on_error(ws: WebSocket, error):
@@ -62,4 +65,3 @@ if __name__ == "__main__":
 
     rel.signal(2, rel.abort)
     rel.dispatch()
-
