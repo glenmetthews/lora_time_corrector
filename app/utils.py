@@ -10,7 +10,7 @@ def get_hex_timestamp():
 
 
 def check_request_time(request_time: str):
-    return int(time.time()) - int(request_time, 16) > int(os.getenv('DELAY'))
+    return abs(int(time.time()) - int(request_time, 16)) > int(os.getenv('DELAY'))
 
 
 def generate_time_package(dev_eui: str, port: int = 60, ack: bool = False, request_time: str = str()):
