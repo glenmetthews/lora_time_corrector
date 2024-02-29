@@ -26,7 +26,7 @@ def on_message(ws: WebSocket, message):
 
     if 'data' in msg_json:
         if re.match(r'^03\w{8}$', msg_json["data"]):
-            if msg_json['type'] == 'UNCONF_UP':
+            if msg_json['type'] == 'CONF_UP':
                 logging.info(f"Запрос времени от {msg_json['devEui']}, с датой {datetime.fromtimestamp(int(msg_json['data'][2:], 16))}")
                 if utils.check_request_time(request_time=msg_json["data"][2:]):
                     utils.send_time_package(ws, dev_eui=msg_json['devEui'], request_time=msg_json["data"][2:])
